@@ -3,13 +3,13 @@ name = "gowatt"
 '''
 Gowatt
 ======
-Gowatt is a layered client API designed to access and control Growatt SPA series
+Gowatt is a layered client API designed to access and control Growatt SPA/SPH series
 Inverters and A/C Couplers.
 
 It automatically goes through a list of growatt.com servers until login is
 successful.  This can be overridden when connecting.
 
-It uses a layered cache with a half-life of the SPA's Shine Adapters poll
+It uses a layered cache with a half-life of the SPA/SPH's Shine Adapters poll
 time.  This ensures that excessive requests to the Growatt Servers are limited.
 
 All non-time based raw data functions store in the cache on-demand.  All highlevel
@@ -21,6 +21,7 @@ highlevel functions is based entirely on whether you need stability or variable 
 provided at the high level.
 
 This code is inspired by https://github.com/indykoning/PyPi_GrowattServer
+Tested on an SPA3000.  Dom3442 provided SPH3600 information (Mix).
 '''
 
 from random import randint
@@ -43,6 +44,7 @@ class Gowatt(object):
   agent_identifier  = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36 Edg/116.0.1938.81"
   session           = None
   plantId           = None
+  deviceType        = None
   deviceSN          = None
   datalogSN         = None
   dataCache         = {}
@@ -78,6 +80,90 @@ class Gowatt(object):
 
     self.session.headers.update(headers)
 
+  def getBatteryChargeRate(self):
+    '''
+    Returns battery charge rate in Watt Hours as an integer
+    '''
+    device = self.rawGetStatusData()
+    
+    # convert to Wh
+    charge = float(device['chargePower']) * 1000
+
+    if charge == 0:
+      charge = float(device['pdisCharge1']) * -1000
+
+    return 0 if device == None else int(charge)
+
+  def getBatteryLevel(self):
+    '''
+    Returns battery level is a percentage integer
+    '''  
+    device = self.rawGetStatusData()
+    return 0 if device == None else int(device['SOC'])
+
+  def getDataLogSN(self):
+    return self.datalogSN
+  
+  def getDeviceSN(self):
+    return self.deviceSN
+
+  def getDeviceType(self):
+    return self.deviceType
+  
+  def getPlantId(self):
+    return self.plantId 
+  
+  def login(self, username, password):
+    '''
+    Log the user in.  This grabs critical data needed later:
+      plantId
+      deviceSN
+      datalogSN
+
+    Returns
+      True - if logged in and ready
+    '''
+
+    loaded = False
+    for url in self.server_urls:
+      self.server_url = 'https://' + url + '/'
+      
+      try:
+        data =  self.post(
+                  'login',  # page
+                  formData = {
+                    'account': username,
+                    'password': password
+                  },
+                  cached = False
+                )
+      except:
+        continue
+
+      if data == None: continue
+
+      self.plantId = self.session.cookies.get('onePlantId')
+      
+      data =  self.rawGetDevices()
+      if data == None: continue
+      
+      # TODO: can support multiple devices here - if needed
+      self.deviceType = data[0]['deviceTypeName']
+      self.deviceSN = data[0]['sn']
+      self.datalogSN = data[0]['datalogSn']
+      
+      data = self.rawGetDataLoggerInfo()
+      if data:
+        # update cache with real refresh time  
+        self.refreshTime = int(data['interval']) / 2 # half actual so we don't drift past
+        for item in self.dataCache:
+          self.dataCache[item]['TTL'] = int(time()) + self.refreshTime
+      
+      loaded = True
+      break
+    
+    return loaded
+  
   def post(self, page, args = {}, formData = {}, cached = True):
     '''
     Simple helper function to get data
@@ -121,7 +207,7 @@ class Gowatt(object):
 
     return self.dataCache[lut]['obj']
 
-  def rawGetDeviceInfo(self):
+  def rawGetDataLoggerInfo(self):
     return  self.post(
               'panel/getDeviceInfo',
               formData = {
@@ -155,64 +241,64 @@ class Gowatt(object):
               args = { 'plantId': self.plantId }
             )
   
-  def rawGetSPAstatusData(self):
+  def rawGetStatusData(self):
     return  self.post(
-              'panel/spa/getSPAStatusData',
+              'panel/{}/get{}StatusData'.format(self.deviceType,self.deviceType.upper()),
               args = { 'plantId': self.plantId },
-              formData = { 'spaSn': self.deviceSN }
+              formData = { '{}Sn'.format(self.deviceType): self.deviceSN }
             )
   
-  def rawGetSPABatChart(self,date = datetime.today().strftime('%Y-%m-%d')):
+  def rawGetBatChart(self,date = datetime.today().strftime('%Y-%m-%d')):
     return  self.post(
-              'panel/spa/getSPABatChart',
+              'panel/{}/get{}BatChart'.format(self.deviceType,self.deviceType.upper()),
               formData = {
                 'plantId': self.plantId,
-                'spaSn': self.deviceSN,
+                '{}Sn'.format(self.deviceType): self.deviceSN,
                 'date': date
               }
             )
 
-  def rawGetSPAEnergyDayChart(self,date = datetime.today().strftime('%Y-%m-%d')):
+  def rawGetEnergyDayChart(self,date = datetime.today().strftime('%Y-%m-%d')):
     return  self.post(
-              'panel/spa/getSPAEnergyDayChart',
+              'panel/{}/get{}EnergyDayChart'.format(self.deviceType,self.deviceType.upper()),
               formData = {
                 'plantId': self.plantId,
-                'spaSn': self.deviceSN,
+                '{}Sn'.format(self.deviceType): self.deviceSN,
                 'date': date
               }
             )
 
-  def rawGetSPAEnergyMonthChart(self,date = datetime.today().strftime('%Y-%m')):
+  def rawGetEnergyMonthChart(self,date = datetime.today().strftime('%Y-%m')):
     return  self.post(
-              'panel/spa/getSPAEnergyMonthChart',
+              'panel/{}/get{}EnergyMonthChart'.format(self.deviceType,self.deviceType.upper()),
               formData = {
                 'plantId': self.plantId,
-                'spaSn': self.deviceSN,
+                '{}Sn'.format(self.deviceType): self.deviceSN,
                 'date': date
               }
             )
 
-  def rawGetSPAEnergyYearChart(self,year = datetime.today().strftime('%Y')):
+  def rawGetEnergyYearChart(self,year = datetime.today().strftime('%Y')):
     return  self.post(
-              'panel/spa/getSPAEnergyYearChart',
+              'panel/{}/get{}EnergyYearChart'.format(self.deviceType,self.deviceType.upper()),
               formData = {
                 'plantId': self.plantId,
-                'spaSn': self.deviceSN,
+                '{}Sn'.format(self.deviceType): self.deviceSN,
                 'year': year
               }
             )
   
-  def rawGetSPAEnergyTotalChart(self,year = datetime.today().strftime('%Y')):
+  def rawGetEnergyTotalChart(self,year = datetime.today().strftime('%Y')):
     return  self.post(
-              'panel/spa/getSPAEnergyTotalChart',
+              'panel/{}/get{}EnergyTotalChart'.format(self.deviceType,self.deviceType.upper()),
               formData = {
                 'plantId': self.plantId,
-                'spaSn': self.deviceSN,
+                '{}Sn'.format(self.deviceType): self.deviceSN,
                 'year': year
               }
             )
 
-  def rawSet(self, type, common, values):
+  def rawSetInternal(self, type, common, values):
     '''
     Applies settings for specified system based on serial number
 
@@ -241,53 +327,14 @@ class Gowatt(object):
             cached = False
            )
 
-  def rawSetMix(self, type, settings):
+  def rawSet(self, type, settings):
     common = {
-      'action': 'mixSet',
+      'action': '{}Set'.format(self.deviceType),
       'serialNum': self.deviceSN,
       'type': type
     }
     
-    return self.rawSet(type, common, settings)
-
-  def rawSetSPA(self, type, settings):
-    common = {
-      'action': 'spaSet',
-      'serialNum': self.deviceSN,
-      'type': type
-    }
-    
-    return self.rawSet(type, common, settings)
-
-  def getBatteryChargeRate(self):
-    '''
-    Returns battery charge rate in Watt Hours as an integer
-    '''
-    device = self.rawGetSPAstatusData()
-    
-    # convert to Wh
-    charge = float(device['chargePower']) * 1000
-
-    if charge == 0:
-      charge = float(device['pdisCharge1']) * -1000
-
-    return 0 if device == None else int(charge)
-
-  def getBatteryLevel(self):
-    '''
-    Returns battery level is a percentage integer
-    '''  
-    device = self.rawGetSPAstatusData()
-    return 0 if device == None else int(device['SOC'])
-
-  def getDataLogSN(self):
-    return self.datalogSN
-  
-  def getDeviceSN(self):
-    return self.deviceSN
-  
-  def getPlantId(self):
-    return self.plantId  
+    return self.rawSetInternal(type, common, settings) 
 
   def setRuleBatteryFirst(self,amount,startHour,endHour,enable):
     '''
@@ -316,7 +363,7 @@ class Gowatt(object):
       '0'                           # Schedule 3 - Enabled/Disabled (1 = Enabled)
     ]
 
-    response = self.rawSetSPA('spa_ac_charge_time_period',schedule_settings)
+    response = self.rawSet('{}_ac_charge_time_period'.format(self.deviceType),schedule_settings)
     print(json.dumps(response)) # used to show working
     
     if not 'msg' in response: return False
@@ -326,57 +373,4 @@ class Gowatt(object):
       return False      
 
     return True
-  
-  def login(self, username, password):
-    '''
-    Log the user in.  This grabs critical data needed later:
-      plantId
-      deviceSN
-      datalogSN
-
-    Returns
-      True - if logged in and ready
-    '''
-
-    loaded = False
-    for url in self.server_urls:
-      self.server_url = 'https://' + url + '/'
-      
-      try:
-        data =  self.post(
-                  'login',  # page
-                  formData = {
-                    'account': username,
-                    'password': password
-                  },
-                  cached = False
-                )
-      except:
-        continue
-
-      if data == None: continue
-
-      self.plantId = self.session.cookies.get('onePlantId')
-      
-      data =  self.rawGetEicDevices()
-      if data == None: continue
-      self.deviceSN = data['sn']
-
-      data =  self.rawGetDevices()
-      if data == None: continue
-      
-      # TODO: can support multiple devices here - if needed
-      self.datalogSN = data[0]['datalogSn']
-      
-      data = self.rawGetDeviceInfo()
-      if data:
-        # update cache with real refresh time  
-        self.refreshTime = int(data['interval']) / 2 # half actual so we don't drift past
-        for item in self.dataCache:
-          self.dataCache[item]['TTL'] = int(time()) + self.refreshTime
-      
-      loaded = True
-      break
-    
-    return loaded
   
