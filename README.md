@@ -1,13 +1,13 @@
 # gowatt
 Python class for managing Growatt server sessions.<br/>
 
-Gowatt is a layered client API designed to access and control Growatt SPA series
+Gowatt is a layered client API designed to access and control Growatt SPA/SPH series
 Inverters and A/C Couplers.<br/>
 
 It automatically goes through a list of growatt.com servers until login is
 successful.  This can be overridden when connecting.<br/>
 
-It uses a layered cache with a half-life of the SPA's Shine Adapters poll
+It uses a layered cache with a half-life of the SPA/SPH's Shine Adapters poll
 time.  This ensures that excessive requests to the Growatt Servers are limited.<br/>
 
 All non-time based raw data functions store in the cache on-demand.  All highlevel
@@ -19,6 +19,7 @@ highlevel functions is based entirely on whether you need stability or variable 
 provided at the high level.<br/>
 
 This code is inspired by https://github.com/indykoning/PyPi_GrowattServer<br/>
+Tested on an SPA3000.  Dom3442 provided SPH3600 information (Mix).<br/>
 
 # API
 ```
@@ -44,14 +45,13 @@ The following raw functions are currently implemented, and return various object
   rawGetDevices()
   rawGetEicDevices()
   rawGetPlantData()
-  rawGetSPAstatusData()
-  rawSetMix(type, settings)
-  rawSetSPA(type, settings)
-  rawGetSPABatChart(date = '2023-10-08')
-  rawGetSPAEnergyDayChart(date = '2023-10-08')
-  rawGetSPAEnergyMonthChart(date = '2023-10')
-  rawGetSPAEnergyYearChart(self,year = '2023')
-  rawGetSPAEnergyTotalChart(self,year = '2023')
+  rawGetStatusData()
+  rawSet(type, settings)
+  rawGetBatChart(date = '2023-10-08')
+  rawGetEnergyDayChart(date = '2023-10-08')
+  rawGetEnergyMonthChart(date = '2023-10')
+  rawGetEnergyYearChart(self,year = '2023')
+  rawGetEnergyTotalChart(self,year = '2023')
 ```
 
 The highlevel API is a work in progress and added as needed.  It is a normalised version of the base data.<br/>
@@ -106,7 +106,7 @@ if __name__ == '__main__':
   print('Plant ID:',plantId,'\nDevice SN:',deviceSN,'\nDataLog SN:',datalogSN)
 
   # Example using raw function
-  device = session.rawGetSPAstatusData()
+  device = session.rawGetStatusData()
   if device:
     print('raw test')
     capacity = int(device['SOC']) - 10
@@ -121,7 +121,7 @@ if __name__ == '__main__':
                           '00','00',                  # Schedule 3 - Start time
                           '00','00',                  # Schedule 3 - End time
                           '0']                        # Schedule 3 - Enabled/Disabled (1 = Enabled)
-    response = session.rawSetSPA('spa_ac_charge_time_period',schedule_settings)
+    response = session.rawSet('spa_ac_charge_time_period',schedule_settings)
     print('raw test result:',str(response))
 
   # Example using highlevel functions
