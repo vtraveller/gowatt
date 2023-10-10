@@ -1,0 +1,407 @@
+
+https://server.growatt.com/login?account=username&password=&XXXX
+
+
+https://server.growatt.com/index/getPlantListTitle
+[
+  {
+    timezone: "1",
+    id: "1234567",
+    plantName: "PLANT NAME"
+  }
+]
+
+https://server.growatt.com/index/getChuanghuoDeviceList
+{
+  result: 0,
+  msg: ""
+}
+
+https://server.growatt.com/index/getPlantTopic + { plantId: 1234567 }
+{
+  result: 1,
+  obj:
+  {
+    topicType: 0
+  }
+}
+
+https://server.growatt.com/homeEnergy/getIsEicUser + { plantId: 1234567 }
+{
+  result: 1,
+  obj:
+  {
+    isEicUser: true
+  }
+}
+
+https://server.growatt.com/components/getHaveNeo + { plantId: 1234567 }
+{
+  result: 1,
+  obj:
+  {
+    getHaveNeo: false
+  }
+}
+
+https://server.growatt.com/panel/getDevicesByPlantList + { currPage: 1, plantId: 1234567 }
+{
+  "result":1,
+  "obj":
+  {
+    "currPage":1,
+    "pages":1,
+    "pageSize":4,
+    "count":1,
+    "ind":1,
+    "datas":
+    [
+      {
+        "ptoStatus":"0",
+        "timeServer":"2023-10-07 20:12:11",
+        "accountName":"username",
+        "timezone":"1",
+        "bctMode":"0",
+        "bdcStatus":"0",
+        "eMonth":"77.1",
+        "dtc":"3701",
+        "pac":"-2370",
+        "batSysRateEnergy":"13.0",
+        "datalogSn":"DATALOGSN",
+        "alias":"DEVSN",
+        "sn":"DEVSN",
+        "deviceType":"0",
+        "plantId":"1234567",
+        "deviceTypeName":"spa",
+        "nominalPower":"3000",
+        "eToday":"6.5",
+        "datalogTypeTest":"ShineWIFI-S",
+        "eTotal":"2808.2",
+        "showDeviceModel":"SPA1~3k TL BL",
+        "location":"",
+        "deviceModel":"SPA3000TL BL",
+        "plantName":"PLANT NAME",
+        "status":"6",
+        "lastUpdateTime":"2023-10-07 13:12:11"
+      }
+    ],
+    "notPager":false
+  }
+}
+
+https://server.growatt.com/panel/getDevicesByPlant?plantId=1234567
+{
+  "result":1,
+  "obj":
+  {
+    "spa":
+    [
+      ["DEVSN","DEVSN","0"]
+    ]
+  }
+}
+
+https://server.growatt.com/layout/getIsLayoutType?plantId=1234567
+{
+  "result":1,
+  "obj":3
+}
+
+https://server.growatt.com/panel/getPanelPageByType?ttt=1696710812269  + { type: spa, sn: DEVSN }
+  returns HTML
+
+https://server.growatt.com/index/getWeatherByPlantId?plantId=1234567
+{
+  "result":1,
+  "obj":
+  {
+    "city":"Sawston",
+    "Week":"Saturday",
+    "dataStr":
+    "{\"HeWeather6\":
+    [
+      {\"now\":
+        {
+          \"cloud\":\"30\",
+          \"hum\":\"70\",
+          \"wind_deg\":\"248\",
+          \"pres\":\"1021\",
+          \"pcpn\":\"0.0\",
+          \"fl\":\"16\",
+          \"tmp\":\"20\",
+          \"wind_sc\":\"4\",
+          \"cond_txt\":\"Sunny\",
+          \"wind_dir\":\"WSW\",
+          \"wind_spd\":\"28\",
+          \"cond_code\":\"100\"
+        },
+        \"update\":
+        {
+          \"loc\":\"2023-10-07 19:17\",
+          \"utc\":\"2023-10-07 11:17\"
+        },
+        \"basic\":
+        {
+          \"ss\":\"18:26\",
+          \"admin_area\":\"Cambridgeshire\",
+          \"toDay\":\"2023-10-07\",
+          \"location\":\"Sawston\",
+          \"parent_city\":\"Sawston\",
+          \"cnty\":\"United kingdom\",
+          \"sr\":\"07:10\"},
+          \"status\":\"ok\"
+        }
+      ]
+    }",
+    "data":
+    {
+      "HeWeather6":
+      [
+        {
+          "now":
+          {
+            "cloud":"30",
+            "hum":"70",
+            "wind_deg":"248",
+            "pres":"1021",
+            "pcpn":"0.0",
+            "fl":"16",
+            "tmp":"20",
+            "wind_sc": "4",
+            "cond_txt":"Sunny",
+            "wind_dir":"WSW",
+            "wind_spd":"28",
+            "cond_code":"100"
+          },
+          "update":
+          {
+            "loc":"2023-10-07 19:17",
+            "utc":"2023-10-07 11:17"
+          },
+          "basic":
+          {
+            "ss":"18:26",
+            "admin_area":"Cambridgeshire",
+            "toDay":"2023-10-07",
+            "location":"Sawston",
+            "parent_city":"Sawston",
+            "cnty":"United kingdom",
+            "sr":"07:10"
+          },
+          "status":"ok"
+        }
+      ]
+    },
+    "radiant":"--"
+  }
+}
+
+https://server.growatt.com/panel/spa/getSPATotalData?plantId=1234567 + { spaSn: DEVSN }
+{
+  "result":1,
+  "obj":
+  {
+    "eselfToday":"5",
+    "gridPowerTotal":"984.8",
+    "eselfTotal":"2793.7",
+    "elocalLoadToday":"10.4",
+    "gridPowerToday":"5.4",
+    "elocalLoadTotal":"3778.5",
+    "photovoltaicRevenueToday":"7.8",
+    "etoGridToday":"0",
+    "edischarge1Total":"1196.6",
+    "photovoltaicRevenueTotal":"3370.4",
+    "unit":"￡",
+    "edischarge1Today":"1.4",
+    "epvInverterTotal":"2808.7",
+    "etogridTotal":"226.9",
+    "epvInverterToday":"6.5"
+  }
+}
+
+https://server.growatt.com/panel/spa/getSPAStatusData?plantId=1234567 + { spaSn: WPDDEVSN }
+{
+  "result":1,
+  "obj":
+  {
+    "pdisCharge1":0.0,
+    "chargePower":2.09,
+    "uwSysWorkMode":"6",
+    "upsVac1":"0",
+    "SOC":"85",
+    "wBatteryType":"1",
+    "pactouser":0.0,
+    "vBat":"54.1",
+    "fAc":"50",
+    "vac1":"248.6",
+    "vAc1":"248.6",
+    "priorityChoose":"0",
+    "lost":"spa.status.normal",
+    "upsFac":"0",
+    "ppv":3.05,
+    "pactogrid":0.0,
+    "pLocalLoad":0.96,
+    "status":"6"
+  }
+}
+
+https://server.growatt.com/panel/spa/getSPABatChart + { plantId: 1234567 + spaSn: DEVSN + [date: 2023-10-07] }
+{
+  "result":1,
+  "obj":
+  {
+    "date":"2023-10-07",
+    "cdsTitle":
+    [
+      "2023-10-01","2023-10-02","2023-10-03","2023-10-04","2023-10-05","2023-10-06","2023-10-07"
+    ],
+    "wBatteryType":"1",
+    "socChart":
+    {
+      "soc":
+      [
+        null,68.0,68.0,68.0,68.0,67.0,67.0,67.0,66.0,66.0,66.0,65.0,65.0,67.0,69.0,70.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,70.5,70.0,69.0,69.0,68.0,67.0,67.0,66.0,66.0,66.0,65.0,65.0,65.0,65.0,64.0,64.0,64.0,64.0,64.0,64.0,63.0,63.0,63.0,63.0,63.0,63.0,63.0,63.0,64.0,64.0,64.0,64.0,64.0,65.0,65.0,66.0,66.0,66.0,67.0,67.0,68.0,68.0,69.0,70.0,71.0,71.0,72.0,72.0,72.0,73.0,74.0,75.0,76.0,76.0,77.0,78.0,79.0,81.0,82.0,83.0,84.0,85.0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+      ]
+    },
+    "cdsData":
+    {
+      "cd_charge":[13.2,10.8,11.5,7.2,3.8,5.9,3.8],
+      "cd_disCharge":[10.4,8.3,6.7,2.5,5.3,5.6,1.4]
+    }
+  }
+}
+
+or no date:
+  {"result":1,"obj":{"date":"2023-10-07","cdsTitle":["2023-10-01","2023-10-02","2023-10-03","2023-10-04","2023-10-05","2023-10-06","2023-10-07"],"wBatteryType":"1","socChart":{"soc":[null,68.0,68.0,68.0,68.0,67.0,67.0,67.0,66.0,66.0,66.0,65.0,65.0,67.0,69.0,70.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,71.0,70.5,70.0,69.0,69.0,68.0,67.0,67.0,66.0,66.0,66.0,65.0,65.0,65.0,65.0,64.0,64.0,64.0,64.0,64.0,64.0,63.0,63.0,63.0,63.0,63.0,63.0,63.0,63.0,64.0,64.0,64.0,64.0,64.0,65.0,65.0,66.0,66.0,66.0,67.0,67.0,68.0,68.0,69.0,70.0,71.0,71.0,72.0,72.0,72.0,73.0,74.0,75.0,76.0,76.0,77.0,78.0,79.0,81.0,82.0,83.0,84.0,85.0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]},"cdsData":{"cd_charge":[13.2,10.8,11.5,7.2,3.8,5.9,3.8],"cd_disCharge":[10.4,8.3,6.7,2.5,5.3,5.6,1.4]}}}
+
+
+https://server.growatt.com/panel/getEicDevicesByPlant + { plantId: 1234567 }
+{
+  "result":1,
+  "obj":
+  {
+    "sn":"DEVSN",
+    "panelType":"spa"
+  }
+}
+
+https://server.growatt.com/panel/getEicPanelPageByType?type=spa&sn=DEVSN
+HTML
+
+https://server.growatt.com/panel/spa/getSPAEnergyDayChart + { date: 2023-10-07, plantId: 1234567, spaSn: DEVSN }
+{"result":1,"obj":{"etouser":"5.4","charts":{"pacToGrid":[null,0.01,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.01,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.01,0.25,0.0,0.0,0.0,0.01,0.05,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.02,0.0,0.0,0.0,0.0,0.01,0.0,0.01,0.0,0.0,0.01,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.01,0.01,0.0,0.0,0.0,0.0,0.0,0.0,0.01,0.0,0.0,0.02,0.01,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"ppv":[null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.01,0.02,0.05,0.06,0.08,0.09,0.11,0.14,0.15,0.16,0.18,0.2,0.24,0.28,0.37,0.41,0.44,0.45,0.42,0.4,0.36,0.35,0.42,0.48,0.54,0.6,0.64,0.65,0.62,0.69,0.67,0.71,0.77,0.91,0.89,0.87,0.99,1.2,1.15,1.2,1.37,1.3,1.46,1.39,1.38,1.58,1.61,1.72,1.8,1.85,2.11,2.16,2.25,1.83,1.75,1.15,1.41,2.34,2.38,2.15,1.92,2.66,1.79,2.9,2.99,2.58,3.02,2.66,3.04,3.05,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"sysOut":[null,0.44,0.42,0.44,0.42,0.42,0.53,0.5,0.51,0.51,0.56,0.56,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.01,0.02,0.05,0.06,0.08,0.09,0.11,0.66,0.745,0.74,1.3,1.34,1.48,0.78,0.76,0.8,0.74,0.91,0.81,0.84,0.75,0.76,0.86,0.83,0.85,0.74,0.73,0.75,0.69,0.69,0.67,0.71,0.77,0.77,0.77,0.78,0.73,0.72,0.81,0.83,0.86,0.85,0.88,0.86,0.82,0.85,0.74,0.77,0.81,0.84,0.91,0.88,0.86,0.85,0.81,0.8,0.82,0.99,0.96,0.97,0.93,1.04,0.75,1.12,1.07,0.97,0.97,0.94,0.94,0.96,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"pself":[null,0.43,0.42,0.44,0.42,0.42,0.53,0.5,0.51,0.51,0.56,0.55,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.01,0.02,0.05,0.06,0.08,0.09,0.11,0.66,0.745,0.73,1.05,1.34,1.48,0.78,0.75,0.75,0.74,0.91,0.81,0.84,0.75,0.76,0.86,0.83,0.85,0.74,0.73,0.75,0.67,0.69,0.67,0.71,0.77,0.76,0.77,0.77,0.73,0.72,0.8,0.83,0.86,0.85,0.88,0.86,0.82,0.85,0.74,0.77,0.81,0.83,0.9,0.88,0.86,0.85,0.81,0.8,0.82,0.98,0.96,0.97,0.91,1.03,0.75,1.12,1.07,0.97,0.97,0.94,0.94,0.96,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"elocalLoad":[null,0.43,0.43,0.44,0.42,0.42,0.53,0.5,0.51,0.52,0.56,0.55,0.84,0.8,0.73,0.65,0.8,0.41,0.45,0.45,0.47,0.47,0.49,0.41,0.47,0.43,0.55,0.55,0.55,0.54,0.54,0.53,0.54,0.55,0.49,0.51,3.8,3.7,3.66,3.67,0.43,0.47,0.46,0.46,0.45,0.46,0.56,0.5,0.5,0.55,0.6,0.55,0.57,0.5,0.45,0.44,0.43,0.48,0.47,0.48,0.47,0.46,0.43,0.72,0.73,0.76,0.85,0.85,0.79,0.79,0.8,0.93,0.96,0.95,0.86,0.9,0.81,0.77,0.78,0.87,0.89,0.92,0.92,0.91,0.6,0.6,0.68,0.65,0.71,0.65,0.66,0.66,1.52,1.67,0.73,0.71,0.66,0.755,0.73,1.05,1.8,2.0,0.79,0.75,0.75,0.74,1.44,0.81,0.84,0.75,0.77,0.86,0.83,0.85,0.74,0.73,0.76,0.67,0.69,0.67,0.72,0.77,0.76,0.78,0.77,0.73,0.72,0.8,0.83,0.88,0.85,0.88,0.86,0.82,0.85,0.74,0.79,0.81,0.83,0.9,0.88,0.86,0.86,0.88,0.8,0.84,0.98,0.96,0.97,0.91,1.03,0.77,1.12,1.07,0.98,0.97,0.94,0.94,0.96,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"pacToUser":[null,0.0,0.01,0.0,0.0,0.0,0.0,0.0,0.0,0.01,0.0,0.0,3.58,3.54,3.47,3.39,0.8,0.41,0.45,0.45,0.47,0.47,0.49,0.41,0.47,0.43,0.55,0.55,0.55,0.54,0.54,0.53,0.54,0.55,0.49,0.51,3.8,3.7,3.66,3.67,0.43,0.47,0.46,0.46,0.45,0.46,0.56,0.5,0.5,0.55,0.6,0.55,0.57,0.5,0.45,0.44,0.43,0.48,0.47,0.48,0.47,0.46,0.43,0.72,0.73,0.76,0.85,0.85,0.79,0.79,0.8,0.93,0.96,0.95,0.86,0.9,0.81,0.77,0.78,0.87,0.89,0.92,0.92,0.91,0.6,0.6,0.68,0.65,0.71,0.64,0.64,0.61,1.46,1.59,0.64,0.6,0.0,0.01,0.0,0.0,0.46,0.52,0.01,0.0,0.0,0.0,0.53,0.0,0.0,0.0,0.01,0.0,0.0,0.0,0.0,0.0,0.01,0.0,0.0,0.0,0.01,0.0,0.0,0.01,0.0,0.0,0.0,0.0,0.0,0.02,0.0,0.0,0.0,0.0,0.0,0.0,0.02,0.0,0.0,0.0,0.0,0.0,0.01,0.07,0.0,0.02,0.0,0.0,0.0,0.0,0.0,0.02,0.0,0.0,0.01,0.0,0.0,0.0,0.0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]},"eCharge":"5","eAcCharge":"0","eChargeToday2":"5","elocalLoad":"10.4","eChargeToday1":"5"}}
+
+https://server.growatt.com/panel/getPlantData?plantId=1234567
+{
+  "result":1,
+  "obj":
+  {
+    "country":"UnitedKingdom",
+    "formulaCo2":"0.0",
+    "accountName":"username",
+    "city":"Duxford",
+    "timezone":"1",
+    "co2":"2799.8",
+    "creatDate":"2023-05-04",
+    "formulaCoal":"0.0",
+    "designCompany":"0",
+    "fixedPowerPrice":"0.0",
+    "id":"1234567",
+    "lat":"52.09633",
+    "valleyPeriodPrice":"0.1621",
+    "lng":"0.125",
+    "locationImg":"null",
+    "tree":"154",
+    "peakPeriodPrice":"0.3863",
+    "plantType":"0",
+    "nominalPower":"3600",
+    "formulaMoney":"0.0",
+    "formulaTree":"0.0",
+    "flatPeriodPrice":"0.4211",
+    "eTotal":"2808.2",
+    "plantImg":"1234567_1images1689707501.jpg",
+    "isShare":"false",
+    "coal":"1123.3",
+    "moneyUnit":"gbp",
+    "plantName":"PLANE NAME",
+    "moneyUnitText":"￡"
+  }
+}
+
+https://server.growatt.com/panel/spa/getSPAEnergyDayChart + { plantId: 1234567, spaSn: DEVSN, date: 2023-10-07 }
+{"result":1,"obj":{"etouser":"5.4","charts":{"pacToGrid":[null,0.01,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.01,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.01,0.25,0.0,0.0,0.0,0.01,0.05,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.02,0.0,0.0,0.0,0.0,0.01,0.0,0.01,0.0,0.0,0.01,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.01,0.01,0.0,0.0,0.0,0.0,0.0,0.0,0.01,0.0,0.0,0.02,0.01,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.01,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"ppv":[null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.01,0.02,0.05,0.06,0.08,0.09,0.11,0.14,0.15,0.16,0.18,0.2,0.24,0.28,0.37,0.41,0.44,0.45,0.42,0.4,0.36,0.35,0.42,0.48,0.54,0.6,0.64,0.65,0.62,0.69,0.67,0.71,0.77,0.91,0.89,0.87,0.99,1.2,1.15,1.2,1.37,1.3,1.46,1.39,1.38,1.58,1.61,1.72,1.8,1.85,2.11,2.16,2.25,1.83,1.75,1.15,1.41,2.34,2.38,2.15,1.92,2.66,1.79,2.9,2.99,2.58,3.02,2.66,3.04,3.05,3.15,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"sysOut":[null,0.44,0.42,0.44,0.42,0.42,0.53,0.5,0.51,0.51,0.56,0.56,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.01,0.02,0.05,0.06,0.08,0.09,0.11,0.66,0.745,0.74,1.3,1.34,1.48,0.78,0.76,0.8,0.74,0.91,0.81,0.84,0.75,0.76,0.86,0.83,0.85,0.74,0.73,0.75,0.69,0.69,0.67,0.71,0.77,0.77,0.77,0.78,0.73,0.72,0.81,0.83,0.86,0.85,0.88,0.86,0.82,0.85,0.74,0.77,0.81,0.84,0.91,0.88,0.86,0.85,0.81,0.8,0.82,0.99,0.96,0.97,0.93,1.04,0.75,1.12,1.07,0.97,0.97,0.94,0.94,0.96,0.96,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"pself":[null,0.43,0.42,0.44,0.42,0.42,0.53,0.5,0.51,0.51,0.56,0.55,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.01,0.02,0.05,0.06,0.08,0.09,0.11,0.66,0.745,0.73,1.05,1.34,1.48,0.78,0.75,0.75,0.74,0.91,0.81,0.84,0.75,0.76,0.86,0.83,0.85,0.74,0.73,0.75,0.67,0.69,0.67,0.71,0.77,0.76,0.77,0.77,0.73,0.72,0.8,0.83,0.86,0.85,0.88,0.86,0.82,0.85,0.74,0.77,0.81,0.83,0.9,0.88,0.86,0.85,0.81,0.8,0.82,0.98,0.96,0.97,0.91,1.03,0.75,1.12,1.07,0.97,0.97,0.94,0.94,0.96,0.95,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"elocalLoad":[null,0.43,0.43,0.44,0.42,0.42,0.53,0.5,0.51,0.52,0.56,0.55,0.84,0.8,0.73,0.65,0.8,0.41,0.45,0.45,0.47,0.47,0.49,0.41,0.47,0.43,0.55,0.55,0.55,0.54,0.54,0.53,0.54,0.55,0.49,0.51,3.8,3.7,3.66,3.67,0.43,0.47,0.46,0.46,0.45,0.46,0.56,0.5,0.5,0.55,0.6,0.55,0.57,0.5,0.45,0.44,0.43,0.48,0.47,0.48,0.47,0.46,0.43,0.72,0.73,0.76,0.85,0.85,0.79,0.79,0.8,0.93,0.96,0.95,0.86,0.9,0.81,0.77,0.78,0.87,0.89,0.92,0.92,0.91,0.6,0.6,0.68,0.65,0.71,0.65,0.66,0.66,1.52,1.67,0.73,0.71,0.66,0.755,0.73,1.05,1.8,2.0,0.79,0.75,0.75,0.74,1.44,0.81,0.84,0.75,0.77,0.86,0.83,0.85,0.74,0.73,0.76,0.67,0.69,0.67,0.72,0.77,0.76,0.78,0.77,0.73,0.72,0.8,0.83,0.88,0.85,0.88,0.86,0.82,0.85,0.74,0.79,0.81,0.83,0.9,0.88,0.86,0.86,0.88,0.8,0.84,0.98,0.96,0.97,0.91,1.03,0.77,1.12,1.07,0.98,0.97,0.94,0.94,0.96,0.95,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"pacToUser":[null,0.0,0.01,0.0,0.0,0.0,0.0,0.0,0.0,0.01,0.0,0.0,3.58,3.54,3.47,3.39,0.8,0.41,0.45,0.45,0.47,0.47,0.49,0.41,0.47,0.43,0.55,0.55,0.55,0.54,0.54,0.53,0.54,0.55,0.49,0.51,3.8,3.7,3.66,3.67,0.43,0.47,0.46,0.46,0.45,0.46,0.56,0.5,0.5,0.55,0.6,0.55,0.57,0.5,0.45,0.44,0.43,0.48,0.47,0.48,0.47,0.46,0.43,0.72,0.73,0.76,0.85,0.85,0.79,0.79,0.8,0.93,0.96,0.95,0.86,0.9,0.81,0.77,0.78,0.87,0.89,0.92,0.92,0.91,0.6,0.6,0.68,0.65,0.71,0.64,0.64,0.61,1.46,1.59,0.64,0.6,0.0,0.01,0.0,0.0,0.46,0.52,0.01,0.0,0.0,0.0,0.53,0.0,0.0,0.0,0.01,0.0,0.0,0.0,0.0,0.0,0.01,0.0,0.0,0.0,0.01,0.0,0.0,0.01,0.0,0.0,0.0,0.0,0.0,0.02,0.0,0.0,0.0,0.0,0.0,0.0,0.02,0.0,0.0,0.0,0.0,0.0,0.01,0.07,0.0,0.02,0.0,0.0,0.0,0.0,0.0,0.02,0.0,0.0,0.01,0.0,0.0,0.0,0.0,0.0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]},"eCharge":"5.1","eAcCharge":"0","eChargeToday2":"5.1","elocalLoad":"10.5","eChargeToday1":"5.1"}}
+
+
+https://server.growatt.com/panel/getDeviceInfo + { plantId: 1234567, deviceTypeName: datalog, sn: DATALOGSN
+{
+  "result":1,
+  "obj":
+  {
+    "deviceType":"ShineWIFI-S",
+    "simSignal":"-65",
+    "ipAndPort":"/213.244.200.53:21244",
+    "interval":"5",
+    "sn":"DATALOGSN",
+    "firmwareVersion":"3.0.0.2",
+    "deviceTypeIndicate":"11"
+  }
+}
+
+https://server.growatt.com/commonDeviceSetC/setSpa?type=server&spaSn=DEVSN&ttt=1696710812269
+HTML
+-> types:
+<div style="width: 800px;" id="setDevice">
+	<div class="device-set-title">Information</div>
+    <table class="table-deviceCommand">
+      <tr class="clickRad tr_dialog_setSPA_top">
+        <td colspan="2">
+          <label class="rad"><input autocomplete="off" type="radio" class="toClick" name="val_dialog_setSPA_type"  value="read"/>
+            <div class="layui-form lsel-max">
+              <select lay-search>
+                <option value="SPA_LOAD_FLAST_TIME_MULTI">Load First No Discharge </option>
+                <option value="SPA_AC_DISCHARGE_TIME_MULTI">Grid First</option>
+                <option value="spa_ac_charge_time_multi">Bat First</option>
+                <option value="pv_on_off">Set Inverter On/Off</option>
+                <option value="pf_sys_time_mutli">Set Time</option>
+                <option value="pv_grid_voltage_high">Set Grid Voltage High</option>
+                <option value="pv_grid_voltage_low">Set Grid Voltage Low</option>
+                <option value="spa_off_grid_enable">Set Eps On/Off</option>
+                <option value="spa_ac_discharge_frequency">Set Eps Frequency</option>
+                <option value="spa_ac_discharge_voltage">Set Eps Voltage</option>
+                <option value="pv_pf_cmd_memory_state">Set Save Pf Command</option>
+                <option value="pv_active_p_rate">Set Active Power Rate</option>
+                <option value="pf_model">Over</option>
+                <option value="pv_reactive_p_rate">Set Reactive Power Rate</option>
+                <option value="pv_power_factor">Set Pf Value</option>
+                <option value="spa_load_flast_value_multi">Load First</option>
+                <option value="spa_ct_select" class="spamodel">Power harvester</option>
+
+
+https://server.growatt.com/tcpSet.do +
+{
+  action: spaSet
+  serialNum: DEVSN
+  type: spa_ac_charge_time_period
+  param1: 100
+  param2: 69
+  param3: 01
+  param4: 00
+  param5: 08
+  param6: 00
+  param7: 1
+  param8: 20
+  param9: 00
+  param10: 20
+  param11: 00
+  param12: 1
+  param13: 00
+  param14: 00
+  param15: 00
+  param16: 00
+  param17: 1
+}
+
+{
+  "msg":"inv_set_success",
+  "success":true
+}
