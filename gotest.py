@@ -5,6 +5,7 @@ if __name__ == '__main__':
   
   print('Logging into Growatt')
   success = session.login('username','12345678')
+
   if not success:
     print('Failed to log into server')
     quit()
@@ -67,14 +68,28 @@ if __name__ == '__main__':
                           '00','00',                  # Schedule 3 - Start time
                           '00','00',                  # Schedule 3 - End time
                           '0']                        # Schedule 3 - Enabled/Disabled (1 = Enabled)
+    if session.getDeviceType() == 'mix':
+      # enable a/c charger
+      schedule_settings.insert(2,'1')
+
     response = session.rawSet('{}_ac_charge_time_period'.format(session.getDeviceType()),schedule_settings)
     print('raw test result:',str(response))
 
   # Example using highlevel functions
   print('highlevel test')
-  capacity = session.getBatteryLevel()
-  pCharge = session.getBatteryChargeRate()
-  success = session.setRuleBatteryFirst(capacity - 20,1,8,True)
-  print('capacity:',capacity,'%   charge rate:',pCharge,'Wh')
+  battery_level = session.getBatteryLevel()
+  battery = session.getBatteryChargeRate()
+  local = session.getLocalLoad()
+  solar = session.getSolarRate()
+  grid = session.getGridRate()
+
+  success = session.setRuleBatteryFirst(battery_level - 20,1,8,True)
+  print(
+    '\nbattery level:',battery_level,'%',
+    '\nbattery rate:',battery,'Wh'
+    '\nsolar rate:',solar,'Wh'
+    '\nlocal rate:',local,'Wh'
+    '\ngrid rate:',grid,'Wh'
+  )
   print('highlevel test','passed' if success else 'failed')
 

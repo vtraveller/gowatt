@@ -109,10 +109,48 @@ class Gowatt(object):
 
   def getDeviceType(self):
     return self.deviceType
+
+  def getGridRate(self):
+    '''
+    Returns FROM grid in Watt Hours as an integer
+    A negative number means TO the grid
+    '''
+    device = self.rawGetStatusData()
+    
+    grid = float(device['pactogrid']) * -1000
+    local = self.getLocalLoad()
+    battery = self.getBatteryChargeRate()
+    solar = self.getSolarRate()
+    
+    if grid == 0:
+      # if not positive, the house plus battery drain minus solar
+      # should equal what's coming FROM the grid
+      grid = local + battery - solar
+    
+    # convert to Wh
+    return grid
+
+  def getLocalLoad(self):
+    '''
+    Returns local load to house in Watt Hours as an integer
+    '''
+    device = self.rawGetStatusData()
+    
+    # convert to Wh
+    return float(device['pLocalLoad']) * 1000
   
   def getPlantId(self):
-    return self.plantId 
+    return self.plantId
   
+  def getSolarRate(self):
+    '''
+    Returns ppv in Watt Hours as an integer
+    '''
+    device = self.rawGetStatusData()
+    
+    # convert to Wh
+    return float(device['ppv']) * 1000
+      
   def login(self, username, password):
     '''
     Log the user in.  This grabs critical data needed later:
@@ -362,6 +400,10 @@ class Gowatt(object):
       '00','00',                    # Schedule 3 - End time
       '0'                           # Schedule 3 - Enabled/Disabled (1 = Enabled)
     ]
+    
+    if self.deviceType == 'mix':
+      # same as 'spa' but needs to enable AC charging (index 2 - between amount and start)
+      schedule_settings.insert(2,str('1' if enable else '0'))
 
     response = self.rawSet('{}_ac_charge_time_period'.format(self.deviceType),schedule_settings)
     print(json.dumps(response)) # used to show working
