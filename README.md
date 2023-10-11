@@ -69,6 +69,13 @@ The highlevel API is a work in progress and added as needed.  It is a normalised
   getDataLogSN()
     Return the data logger serial number discovered at login
 
+  getGridRate()
+    Returns FROM grid in Watt Hours as an integer
+    A negative number means TO the grid
+
+  getLocalLoad()
+    Returns local load to house in Watt Hours as an integer
+
   getPlantId()
     Return the plant id discovered at login
 
@@ -81,6 +88,9 @@ The highlevel API is a work in progress and added as needed.  It is a normalised
       startHour -> when to start
       endHour   -> when to finish
       enable    -> whether rule is enabled or disabled
+
+  getSolarRate()
+    Returns ppv in Watt Hours as an integer
 ```
 
 # Example
@@ -93,7 +103,7 @@ if __name__ == '__main__':
   session = gowatt.Gowatt();
   
   print('Logging into Growatt')
-  success = session.login('username','password')
+  success = session.login('username','12345678')
   if not success:
     print('Failed to log into server')
     quit()
@@ -101,15 +111,50 @@ if __name__ == '__main__':
   print('Success.')
   
   plantId = session.getPlantId();
+  deviceType = session.getDeviceType();
   deviceSN = session.getDeviceSN();
   datalogSN = session.getDataLogSN();
-  print('Plant ID:',plantId,'\nDevice SN:',deviceSN,'\nDataLog SN:',datalogSN)
+  print(
+    'Plant ID:',plantId,
+    '\nDevice Type:',deviceType,
+    '\nDevice SN:',deviceSN,
+    '\nDataLog SN:',datalogSN
+  )
 
   # Example using raw function
-  device = session.rawGetStatusData()
-  if device:
-    print('raw test')
-    capacity = int(device['SOC']) - 10
+  deviceInfo = session.rawGetDataLoggerInfo()
+  print('\nrawGetDataLoggerInfo()\n',str(deviceInfo))
+
+  devices = session.rawGetDevices()
+  print('\nrawGetDevices()\n',str(devices))
+  
+  eicDevices = session.rawGetEicDevices()
+  print('\nrawGetEicDevices()\n',str(eicDevices))
+  
+  plantData = session.rawGetPlantData()
+  print('\nrawGetPlantData()\n',str(plantData))
+  
+  deviceStatus = session.rawGetStatusData()
+  print('\nrawGetStatusData()\n',str(deviceStatus))
+  
+  batChart = session.rawGetBatChart()
+  print('\nrawGetBatChart()\n',str(batChart))
+
+  energyDayChart = session.rawGetEnergyDayChart()
+  print('\nrawGetEnergyDayChart()\n',str(energyDayChart))
+  
+  energyMonthChart = session.rawGetEnergyMonthChart()
+  print('\nrawGetEnergyMonthChart()\n',str(energyMonthChart))
+  
+  energyYearChart = session.rawGetEnergyYearChart()
+  print('\nrawGetEnergyYearChart()\n',str(energyYearChart))
+  
+  energyTotalChar = session.rawGetEnergyTotalChart()
+  print('\nrawGetEnergyTotalChart()\n',str(energyTotalChar))
+  
+  if deviceStatus:
+    print('\nraw test')
+    capacity = int(deviceStatus['SOC']) - 10
     schedule_settings = ['100',                       # Charging power %
                           str(capacity),              # Stop charging when above SoC %
                           '01', '00',                 # Schedule 1 - Start time
@@ -121,14 +166,28 @@ if __name__ == '__main__':
                           '00','00',                  # Schedule 3 - Start time
                           '00','00',                  # Schedule 3 - End time
                           '0']                        # Schedule 3 - Enabled/Disabled (1 = Enabled)
-    response = session.rawSet('spa_ac_charge_time_period',schedule_settings)
+    if session.getDeviceType() == 'mix':
+      # enable a/c charger
+      schedule_settings.insert(2,'1')
+
+    response = session.rawSet('{}_ac_charge_time_period'.format(session.getDeviceType()),schedule_settings)
     print('raw test result:',str(response))
 
   # Example using highlevel functions
   print('highlevel test')
-  capacity = session.getBatteryLevel()
-  pCharge = session.getBatteryChargeRate()
-  success = session.setRuleBatteryFirst(capacity - 20,1,8,True)
-  print('capacity:',capacity,'%   charge rate:',pCharge,'Wh')
+  battery_level = session.getBatteryLevel()
+  battery = session.getBatteryChargeRate()
+  local = session.getLocalLoad()
+  solar = session.getSolarRate()
+  grid = session.getGridRate()
+
+  success = session.setRuleBatteryFirst(battery_level - 20,1,8,True)
+  print(
+    '\nbattery level:',battery_level,'%',
+    '\nbattery rate:',battery,'Wh'
+    '\nsolar rate:',solar,'Wh'
+    '\nlocal rate:',local,'Wh'
+    '\ngrid rate:',grid,'Wh'
+  )
   print('highlevel test','passed' if success else 'failed')
 ```
