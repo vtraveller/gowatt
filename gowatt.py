@@ -42,6 +42,8 @@ class Gowatt(object):
   ]
   server_url        = None
   agent_identifier  = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36 Edg/116.0.1938.81"
+  username          = None # needed for relogging in on timeout
+  password          = None # needed for relogging in on timeout
   session           = None
   plantId           = None
   deviceType        = None
@@ -85,6 +87,7 @@ class Gowatt(object):
     Returns battery charge rate in Watt Hours as an integer
     '''
     device = self.rawGetStatusData()
+    if not device: return None
     
     # convert to Wh
     charge = float(device['chargePower']) * 1000
@@ -99,6 +102,8 @@ class Gowatt(object):
     Returns battery level is a percentage integer
     '''  
     device = self.rawGetStatusData()
+    if not device: return None
+
     return 0 if device == None else int(device['SOC'])
 
   def getDataLogSN(self):
@@ -116,6 +121,7 @@ class Gowatt(object):
     A negative number means TO the grid
     '''
     device = self.rawGetStatusData()
+    if not device: return None
     
     grid = float(device['pactogrid']) * -1000
     local = self.getLocalLoad()
@@ -135,6 +141,7 @@ class Gowatt(object):
     Returns local load to house in Watt Hours as an integer
     '''
     device = self.rawGetStatusData()
+    if not device: return None
     
     # convert to Wh
     return float(device['pLocalLoad']) * 1000
@@ -147,6 +154,7 @@ class Gowatt(object):
     Returns ppv in Watt Hours as an integer
     '''
     device = self.rawGetStatusData()
+    if not device: return None
     
     # convert to Wh
     return float(device['ppv']) * 1000
@@ -163,17 +171,22 @@ class Gowatt(object):
     '''
 
     loaded = False
+    self.username = username # save for relogin
+    self.password = password # save for relogin
+
     for url in self.server_urls:
       self.server_url = 'https://' + url + '/'
       
       try:
+        self.session.cookies.clear()
         data =  self.post(
                   'login',  # page
                   formData = {
                     'account': username,
                     'password': password
                   },
-                  cached = False
+                  cached = False,
+                  retry = False
                 )
       except:
         continue
@@ -202,7 +215,7 @@ class Gowatt(object):
     
     return loaded
   
-  def post(self, page, args = {}, formData = {}, cached = True):
+  def post(self, page, args = {}, formData = {}, cached = True, retry = True):
     '''
     Simple helper function to get data
     '''
@@ -221,17 +234,32 @@ class Gowatt(object):
       attributes += arg + '=' + args[arg]
     
     try:
-      response = self.session.post(
-                    self.server_url + page + attributes,
-                    data = formData
-                  )
+      success = False
+      while not success:
+        response = self.session.post(
+                      self.server_url + page + attributes,
+                      data = formData
+                    )
+      
+        if not response.ok: return None
+        if not response.content: return None
+
+        content = str(response.content)
+        success = (content.find('<!DOCTYPE html') == -1)
+        
+        if not success:
+          # happens if we get logged out - no longer a JSON response
+          if retry:
+            logged_in = self.login(self.username,self.password)
+            if not logged_in: return None
+          else:
+            return None
+
+      data = json.loads(response.content.decode('utf-8'))
 
     except:
+      # fatal failure
       return None  
-      
-    if not response.ok: return None
-    if not response.content: return None
-    data = json.loads(response.content.decode('utf-8'))
 
     if not 'result' in data: return data
     if data['result'] != 1: return None
@@ -408,7 +436,7 @@ class Gowatt(object):
     response = self.rawSet('{}_ac_charge_time_period'.format(self.deviceType),schedule_settings)
     print(json.dumps(response)) # used to show working
     
-    if not 'msg' in response: return False
+    if not response or not 'msg' in response: return False
 
     if response['msg'] != 'inv_set_success':
       print('failed - NEED RECOVERY - ' + response['msg'])
