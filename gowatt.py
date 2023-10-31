@@ -444,3 +444,27 @@ class Gowatt(object):
 
     return True
   
+  def setTime(self,hour,min,date = datetime.today().strftime('%Y-%m-%d')):
+    '''
+    Sets the system time.
+    
+    Parameters:
+      hour -> to set
+      min  -> to set
+      date -> override today's date (prob not needed)
+    '''  
+
+    settings = [
+      '{} {}:{}'.format(date,hour,min)
+    ]
+    
+    response = self.rawSet('pf_sys_year',settings)
+    print(json.dumps(response)) # used to show working
+    
+    if not response or not 'msg' in response: return False
+
+    if response['msg'] != 'inv_set_success':
+      print('failed - NEED RECOVERY - ' + response['msg'])
+      return False      
+
+    return True
