@@ -143,8 +143,11 @@ class Gowatt(object):
     device = self.rawGetStatusData()
     if not device: return None
     
+    battery = self.getBatteryChargeRate()
+    if battery < 0: battery = 0 # remove impact if helping load
+    
     # convert to Wh
-    return float(device['pLocalLoad']) * 1000
+    return (float(device['pLocalLoad']) * 1000) - battery
   
   def getPlantId(self):
     return self.plantId
