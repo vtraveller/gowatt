@@ -57,8 +57,8 @@ The following raw functions are currently implemented, and return various object
 The highlevel API is a work in progress and added as needed.  It is a normalised version of the base data.<br/>
 
 ```
-  getBatteryChargeRate()
-    Returns battery charge rate in Watt Hours as an integer
+  getBatteryRate()
+    Returns battery charge/discharge rate in Watt Hours as an integer
 
   getBatteryLevel()
     Returns battery level is a percentage integer
@@ -176,7 +176,7 @@ if __name__ == '__main__':
   # Example using highlevel functions
   print('highlevel test')
   battery_level = session.getBatteryLevel()
-  battery = session.getBatteryChargeRate()
+  battery = session.getBatteryRate()
   local = session.getLocalLoad()
   solar = session.getSolarRate()
   grid = session.getGridRate()
