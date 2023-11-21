@@ -82,18 +82,20 @@ class Gowatt(object):
 
     self.session.headers.update(headers)
 
-  def getBatteryChargeRate(self):
+  def getBatteryRate(self):
     '''
-    Returns battery charge rate in Watt Hours as an integer
+    Returns battery rate in Watt Hours as an integer
+    Battery is positive +Wh if discharging (power out), and negative -Wh (power in) if charging
     '''
     device = self.rawGetStatusData()
     if not device: return None
     
     # convert to Wh
-    charge = float(device['chargePower']) * 1000
+    # Battery:  positive for power out, negative for power in if charging battery
+    charge = float(device['chargePower']) * -1000
 
     if charge == 0:
-      charge = float(device['pdisCharge1']) * -1000
+      charge = float(device['pdisCharge1']) * 1000
 
     return 0 if device == None else int(charge)
 
@@ -118,36 +120,50 @@ class Gowatt(object):
   def getGridRate(self):
     '''
     Returns FROM grid in Watt Hours as an integer
-    A negative number means TO the grid
+    Positive for power out (to local/house), negative for power in (to grid)
     '''
     device = self.rawGetStatusData()
     if not device: return None
     
-    grid = float(device['pactogrid']) * -1000
-    local = self.getLocalLoad()
-    battery = self.getBatteryChargeRate()
-    solar = self.getSolarRate()
+    # convert to Wh
+    # Solar:    positive for power out
+    # Battery:  positive for power out, negative for power in if charging battery
+    # Local:    negative as power in
+    # Grid:     positive for power out (to local/house), negative for power in (to grid)
+
+    grid = float(device['pactogrid']) * 1000
     
     if grid == 0:
-      # if not positive, the house plus battery drain minus solar
-      # should equal what's coming FROM the grid
-      grid = local + battery - solar
+      # if not positive, the local/house plus battery drain minus solar
+      # should equal what's coming FROM the grid or TO the grid
+
+      local = float(device['pLocalLoad']) * -1000
+      battery = self.getBatteryRate() # positive for discharging (power out)
+      solar = self.getSolarRate() # positive for power out
+
+      grid = local + battery + solar
     
-    # convert to Wh
-    return grid
+    # Grid: positive for power out (to local/house), negative for power in (to grid)
+    return -grid
 
   def getLocalLoad(self):
     '''
-    Returns local load to house in Watt Hours as an integer
+    Returns local load to local/house in Watt Hours as an integer
+    Local load is negative (-Wh) as power in being consumed/used
+    
     '''
     device = self.rawGetStatusData()
     if not device: return None
     
-    battery = self.getBatteryChargeRate()
-    if battery < 0: battery = 0 # remove impact if helping load
+    battery = self.getBatteryRate()
+    if battery > 0: battery = 0 # remove impact if not helping load
+    
+    grid = float(device['pactogrid']) * -1000
+    if grid < 0: grid = 0 # remove impact if not helping load
     
     # convert to Wh
-    return (float(device['pLocalLoad']) * 1000) - battery
+    # Local:    negative as power in
+    return (-float(device['pLocalLoad']) * 1000) + battery + grid
   
   def getPlantId(self):
     return self.plantId
@@ -155,11 +171,13 @@ class Gowatt(object):
   def getSolarRate(self):
     '''
     Returns ppv in Watt Hours as an integer
+    Positive Wh as power out
     '''
     device = self.rawGetStatusData()
     if not device: return None
     
     # convert to Wh
+    # Solar:    positive for power out
     return float(device['ppv']) * 1000
       
   def login(self, username, password):

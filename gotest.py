@@ -78,7 +78,7 @@ if __name__ == '__main__':
   # Example using highlevel functions
   print('highlevel test')
   battery_level = session.getBatteryLevel()
-  battery = session.getBatteryChargeRate()
+  battery = session.getBatteryRate()
   local = session.getLocalLoad()
   solar = session.getSolarRate()
   grid = session.getGridRate()
