@@ -79,6 +79,9 @@ The highlevel API is a work in progress and added as needed.  It is a normalised
   getPlantId()
     Return the plant id discovered at login
 
+  getSolarRate()
+    Returns ppv in Watt Hours as an integer
+
   setRuleBatteryFirst(amount,startHour,endHour,enable):
     Sets the amount to charge the battery.
     Only the first schedule is used, all others are zero'd
@@ -96,10 +99,7 @@ The highlevel API is a work in progress and added as needed.  It is a normalised
     Parameters:
       startHour -> when to start
       endHour   -> when to finish
-      enable    -> whether rule is enabled or disabled
-  
-  getSolarRate()
-    Returns ppv in Watt Hours as an integer
+      enable    -> whether rule is enabled or disabled  
 ```
 
 # Example
