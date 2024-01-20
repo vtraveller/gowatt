@@ -422,7 +422,7 @@ class Gowatt(object):
     }
     
     return self.rawSetInternal(type, common, settings) 
-
+  
   def setRuleBatteryFirst(self,amount,startHour,endHour,enable):
     '''
     Sets the amount to charge the battery.
@@ -462,6 +462,46 @@ class Gowatt(object):
     if response['msg'] != 'inv_set_success':
       print('failed - NEED RECOVERY - ' + response['msg'])
       return False      
+
+    return True
+
+  def setRuleLoadFirst(self,startHour,endHour,enable):
+    '''
+    Sets the time to use load.
+    Only the first schedule is used, all others are zero'd
+    
+    Parameters:
+      startHour -> when to start
+      endHour   -> when to finish
+      enable    -> whether rule is enabled or disabled
+    '''
+    
+    # All parameters need to be given, including zeros
+    # All parameters must be strings
+    schedule_settings = [
+      str(startHour), '00',         # Schedule 1 - Start time
+      str(endHour), '00',           # Schedule 1 - End time
+      str('1' if enable else '0'),  # Schedule 1 - Enabled/Disabled (1 = Enabled)
+      '00','00',                    # Schedule 2 - Start time
+      '00','00',                    # Schedule 2 - End time
+      '0',                          # Schedule 2 - Enabled/Disabled (1 = Enabled)
+      '00','00',                    # Schedule 3 - Start time
+      '00','00',                    # Schedule 3 - End time
+      '0'                           # Schedule 3 - Enabled/Disabled (1 = Enabled)
+    ]
+    
+    if self.deviceType == 'mix':
+      # same as 'spa' but needs to enable AC charging (index 2 - between amount and start)
+      schedule_settings.insert(2,str('1' if enable else '0'))
+
+    response = self.rawSet('{}_load_flast'.format(self.deviceType),schedule_settings)
+    print(json.dumps(response)) # used to show working
+    
+    if not response or not 'msg' in response: return False
+
+    if response['msg'] != 'inv_set_success':
+      print('failed - NEED RECOVERY - ' + response['msg'])
+      return False
 
     return True
   
