@@ -89,6 +89,15 @@ The highlevel API is a work in progress and added as needed.  It is a normalised
       endHour   -> when to finish
       enable    -> whether rule is enabled or disabled
 
+  setRuleLoadFirst(self,startHour,endHour,enable):
+    Sets the time to use load.
+    Only the first schedule is used, all others are zero'd
+  
+    Parameters:
+      startHour -> when to start
+      endHour   -> when to finish
+      enable    -> whether rule is enabled or disabled
+  
   getSolarRate()
     Returns ppv in Watt Hours as an integer
 ```
