@@ -38,51 +38,54 @@ Returns True if logged in.  At this point the PlantId, DeviceSN and DatalogSN ar
 as well as the cache expiry time; this half the datalog interval.
 ```
 
-The following raw functions are currently implemented, and return various object dicts:<br/>
+The following raw functions are currently implemented, where appropriate today's date is used, and the first deviceSN, if not specified, and return various object dicts:<br/>
 
 ```
-  rawGetDeviceInfo()
+  rawGetDataLoggerInfo(deviceSN = None)
   rawGetDevices()
   rawGetEicDevices()
   rawGetPlantData()
-  rawGetStatusData()
-  rawSet(type, settings)
-  rawGetBatChart(date = '2023-10-08')
-  rawGetEnergyDayChart(date = '2023-10-08')
-  rawGetEnergyMonthChart(date = '2023-10')
-  rawGetEnergyYearChart(self,year = '2023')
-  rawGetEnergyTotalChart(self,year = '2023')
+  rawGetStatusData(deviceSN = None)
+  rawGetBatChart(date = '2023-10-08', deviceSN = None)
+  rawGetEnergyDayChart(date = '2023-10-08', deviceSN = None)
+  rawGetEnergyMonthChart(date = '2023-10', deviceSN = None)
+  rawGetEnergyYearChart(self,year = '2023', deviceSN = None)
+  rawGetEnergyTotalChart(self,year = '2023', deviceSN = None)
+  rawSet(type, settings, deviceSN = None)
 ```
 
-The highlevel API is a work in progress and added as needed.  It is a normalised version of the base data.<br/>
+The highlevel API is a work in progress and added as needed.  It is a normalised version of the base data.  Where appropriate, if you don't specify a deviceSN then the first device is used.<br/>
 
 ```
-  getBatteryRate()
+  getBatteryRate(deviceSN = None)
     Returns battery charge/discharge rate in Watt Hours as an integer
 
-  getBatteryLevel()
+  getBatteryLevel(deviceSN = None)
     Returns battery level is a percentage integer
 
-  getDeviceSN()
-    Return the device serial number discovered at login
-
-  getDataLogSN()
+  getDataLogSN(deviceSN = None)
     Return the data logger serial number discovered at login
 
-  getGridRate()
+  getDeviceSNlist()
+    Return a list of known device serial numbers.  This can be used as the deviceSN argument on other APIs.
+
+  getDeviceType(deviceSN = None)
+    Return the device type.  Typically 'spa' or 'mix'.
+
+  getGridRate(deviceSN = None)
     Returns FROM grid in Watt Hours as an integer
     A negative number means TO the grid
 
-  getLocalLoad()
+  getLocalLoad(deviceSN = None)
     Returns local load to house in Watt Hours as an integer
 
   getPlantId()
     Return the plant id discovered at login
 
-  getSolarRate()
+  getSolarRate(deviceSN = None)
     Returns ppv in Watt Hours as an integer
 
-  setRuleBatteryFirst(amount,startHour,endHour,enable):
+  setRuleBatteryFirst(amount,startHour,endHour,enable,startMin = 0,endMin = 0,deviceSN = None):
     Sets the amount to charge the battery.
     Only the first schedule is used, all others are zero'd
     
@@ -92,14 +95,24 @@ The highlevel API is a work in progress and added as needed.  It is a normalised
       endHour   -> when to finish
       enable    -> whether rule is enabled or disabled
 
-  setRuleLoadFirst(self,startHour,endHour,enable):
+    Optional:
+      startMin  -> when to start by minute
+      endMin    -> when to end by minute
+      deviceSN  -> device serial number
+
+  setRuleLoadFirst(self,startHour,endHour,enable,startMin = 0,endMin = 0,deviceSN = None):
     Sets the time to use load.
     Only the first schedule is used, all others are zero'd
   
     Parameters:
       startHour -> when to start
       endHour   -> when to finish
-      enable    -> whether rule is enabled or disabled  
+      enable    -> whether rule is enabled or disabled
+
+    Optional:
+      startMin  -> when to start by minute
+      endMin    -> when to end by minute
+      deviceSN  -> device serial number
 ```
 
 # Example
@@ -119,16 +132,19 @@ if __name__ == '__main__':
     
   print('Success.')
   
-  plantId = session.getPlantId();
-  deviceType = session.getDeviceType();
-  deviceSN = session.getDeviceSN();
-  datalogSN = session.getDataLogSN();
-  print(
-    'Plant ID:',plantId,
-    '\nDevice Type:',deviceType,
-    '\nDevice SN:',deviceSN,
-    '\nDataLog SN:',datalogSN
-  )
+  plantId = session.getPlantId()
+  print('Plant ID:',plantId)
+
+  deviceSNlist = session.getDeviceSNlist();
+
+  for deviceSN in deviceSNlist:
+    deviceType = session.getDeviceType(deviceSN = deviceSN)
+    datalogSN = session.getDataLogSN(deviceSN = deviceSN)
+    print(
+      '\nDevice Type:',deviceType,
+      '\nDevice SN:',deviceSN,
+      '\nDataLog SN:',datalogSN
+    )
 
   # Example using raw function
   deviceInfo = session.rawGetDataLoggerInfo()
