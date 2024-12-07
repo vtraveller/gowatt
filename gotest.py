@@ -5,7 +5,6 @@ if __name__ == '__main__':
   
   print('Logging into Growatt')
   success = session.login('username','12345678')
-
   if not success:
     print('Failed to log into server')
     quit()
@@ -13,15 +12,17 @@ if __name__ == '__main__':
   print('Success.')
   
   plantId = session.getPlantId();
-  deviceType = session.getDeviceType();
-  deviceSN = session.getDeviceSN();
-  datalogSN = session.getDataLogSN();
-  print(
-    'Plant ID:',plantId,
-    '\nDevice Type:',deviceType,
-    '\nDevice SN:',deviceSN,
-    '\nDataLog SN:',datalogSN
-  )
+  print('Plant ID: {}\n'.format(plantId))
+
+  devicesSN = session.getDeviceSNlist();
+
+  for deviceSN in devicesSN:
+    deviceType = session.getDeviceType(deviceSN);
+    datalogSN = session.getDataLogSN(deviceSN);
+    print(
+      'Device Type: {}\nDevice SN: {}\nDatalog SN: {}'
+        .format(deviceType,deviceSN,datalogSN)
+    )
 
   # Example using raw function
   deviceInfo = session.rawGetDataLoggerInfo()
@@ -56,7 +57,7 @@ if __name__ == '__main__':
   
   if deviceStatus:
     print('\nraw test')
-    capacity = int(deviceStatus['SOC']) - 10
+    capacity = int(deviceStatus['SOC']) + 10
     schedule_settings = ['100',                       # Charging power %
                           str(capacity),              # Stop charging when above SoC %
                           '01', '00',                 # Schedule 1 - Start time
@@ -83,7 +84,10 @@ if __name__ == '__main__':
   solar = session.getSolarRate()
   grid = session.getGridRate()
 
-  success = session.setRuleBatteryFirst(battery_level - 20,1,8,True)
+  success = session.setRuleBatteryFirst(battery_level + 20,1,8,True)
+
+  success = session.setRuleLoadFirst(19,20,False)
+
   print(
     '\nbattery level:',battery_level,'%',
     '\nbattery rate:',battery,'Wh'

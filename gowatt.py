@@ -46,9 +46,7 @@ class Gowatt(object):
   password          = None # needed for relogging in on timeout
   session           = None
   plantId           = None
-  deviceType        = None
-  deviceSN          = None
-  datalogSN         = None
+  device            = {} # { type: '', datalogSN: '' } -> index = deviceSN, type = deviceType, datalogSN = datalogSN -> logical change
   dataCache         = {}
   refreshTime       = 1 # time in minutes before data expires 
 
@@ -82,12 +80,24 @@ class Gowatt(object):
 
     self.session.headers.update(headers)
 
-  def getBatteryRate(self):
+  def __getDeviceSN(self,deviceSN):
+    # if the user didn't specify a deviceSN
+    # we'll return the first we have
+    if not self.device:
+      return None # safety
+
+    if not deviceSN:
+      keys = list(self.device.keys())
+      deviceSN = keys[0]
+
+    return deviceSN
+
+  def getBatteryRate(self, deviceSN = None):
     '''
     Returns battery rate in Watt Hours as an integer
     Battery is positive +Wh if discharging (power out), and negative -Wh (power in) if charging
     '''
-    device = self.rawGetStatusData()
+    device = self.rawGetStatusData(deviceSN = deviceSN)
     if not device: return None
     
     # convert to Wh
@@ -99,30 +109,32 @@ class Gowatt(object):
 
     return 0 if device == None else int(charge)
 
-  def getBatteryLevel(self):
+  def getBatteryLevel(self, deviceSN = None):
     '''
     Returns battery level is a percentage integer
     '''  
-    device = self.rawGetStatusData()
+    device = self.rawGetStatusData(deviceSN = deviceSN)
     if not device: return None
 
     return 0 if device == None else int(device['SOC'])
 
-  def getDataLogSN(self):
-    return self.datalogSN
+  def getDataLogSN(self, deviceSN = None):
+    deviceSN = self.__getDeviceSN(deviceSN)
+    return self.device[deviceSN]['datalogSN']
   
-  def getDeviceSN(self):
-    return self.deviceSN
+  def getDeviceSNlist(self):
+    return self.device.keys()
 
-  def getDeviceType(self):
-    return self.deviceType
+  def getDeviceType(self, deviceSN = None):
+    deviceSN = self.__getDeviceSN(deviceSN)
+    return self.device[deviceSN]['type']
 
-  def getGridRate(self):
+  def getGridRate(self,deviceSN = None):
     '''
     Returns FROM grid in Watt Hours as an integer
     Positive for power out (to local/house), negative for power in (to grid)
     '''
-    device = self.rawGetStatusData()
+    device = self.rawGetStatusData(deviceSN = deviceSN)
     if not device: return None
     
     # convert to Wh
@@ -146,34 +158,34 @@ class Gowatt(object):
     # Grid: positive for power out (to local/house), negative for power in (to grid)
     return -grid
 
-  def getLocalLoad(self):
+  def getLocalLoad(self, deviceSN = None):
     '''
     Returns local load to local/house in Watt Hours as an integer
     Local load is negative (-Wh) as power in being consumed/used
     
     '''
-    device = self.rawGetStatusData()
+    device = self.rawGetStatusData(deviceSN = deviceSN)
     if not device: return None
     
-    battery = self.getBatteryRate()
-    if battery > 0: battery = 0 # remove impact if not helping load
+    # battery = self.getBatteryRate()
+    # if battery < 0: battery = 0 # remove impact if not helping load
     
     grid = float(device['pactogrid']) * -1000
     if grid < 0: grid = 0 # remove impact if not helping load
     
     # convert to Wh
     # Local:    negative as power in
-    return (-float(device['pLocalLoad']) * 1000) + battery + grid
+    return (-float(device['pLocalLoad']) * 1000) + grid
   
   def getPlantId(self):
     return self.plantId
   
-  def getSolarRate(self):
+  def getSolarRate(self, deviceSN = None):
     '''
     Returns ppv in Watt Hours as an integer
     Positive Wh as power out
     '''
-    device = self.rawGetStatusData()
+    device = self.rawGetStatusData(deviceSN = deviceSN)
     if not device: return None
     
     # convert to Wh
@@ -218,18 +230,24 @@ class Gowatt(object):
       
       data =  self.rawGetDevices()
       if data == None: continue
+
+      # self.device[deviceSN]['type'] = data[0]['deviceTypeName']
+      # self.device[deviceSN] = data[0]['sn']
+      # self.device[deviceSN]['datalogSN'] = data[0]['datalogSn']
+
+      for item in data:
+        deviceSN = item['sn']
+        self.device[deviceSN] = {
+          'type': item['deviceTypeName'],
+          'datalogSN': item['datalogSn']
+        }
       
-      # TODO: can support multiple devices here - if needed
-      self.deviceType = data[0]['deviceTypeName']
-      self.deviceSN = data[0]['sn']
-      self.datalogSN = data[0]['datalogSn']
-      
-      data = self.rawGetDataLoggerInfo()
-      if data:
-        # update cache with real refresh time  
-        self.refreshTime = int(data['interval']) / 2 # half actual so we don't drift past
-        for item in self.dataCache:
-          self.dataCache[item]['TTL'] = int(time()) + self.refreshTime
+        data = self.rawGetDataLoggerInfo(deviceSN = deviceSN)
+        if data:
+          # update cache with real refresh time
+          self.refreshTime = int(data['interval']) / 2 # half actual so we don't drift past
+          for item in self.dataCache:
+            self.dataCache[item]['TTL'] = int(time()) + self.refreshTime
       
       loaded = True
       break
@@ -240,7 +258,6 @@ class Gowatt(object):
     '''
     Simple helper function to get data
     '''
-    
     if cached == True:
       lut = page + ':' + str(args) + ':' + str(formData)
       if lut in self.dataCache:
@@ -294,13 +311,15 @@ class Gowatt(object):
 
     return self.dataCache[lut]['obj']
 
-  def rawGetDataLoggerInfo(self):
+  def rawGetDataLoggerInfo(self,deviceSN = None):
+    deviceSN = self.__getDeviceSN(deviceSN)
+    datalogSN = self.device[deviceSN]['datalogSN']
     return  self.post(
               'panel/getDeviceInfo',
               formData = {
                 'plantId': self.plantId,
                 'deviceTypeName': 'datalog',
-                'sn': self.datalogSN
+                'sn': datalogSN
               }
             )
   
@@ -328,64 +347,77 @@ class Gowatt(object):
               args = { 'plantId': self.plantId }
             )
   
-  def rawGetStatusData(self):
+  def rawGetStatusData(self, deviceSN = None):
+    deviceSN = self.__getDeviceSN(deviceSN)
+    deviceType = self.device[deviceSN]['type']
+
     return  self.post(
-              'panel/{}/get{}StatusData'.format(self.deviceType,self.deviceType.upper()),
+              'panel/{}/get{}StatusData'.format(self.device[deviceSN]['type'],self.device[deviceSN]['type'].upper()),
               args = { 'plantId': self.plantId },
-              formData = { '{}Sn'.format(self.deviceType): self.deviceSN }
+              formData = { '{}Sn'.format(deviceType): deviceSN }
             )
   
-  def rawGetBatChart(self,date = datetime.today().strftime('%Y-%m-%d')):
+  def rawGetBatChart(self,date = datetime.today().strftime('%Y-%m-%d'), deviceSN = None):
+    deviceSN = self.__getDeviceSN(deviceSN)
+    deviceType = self.device[deviceSN]['type']
     return  self.post(
-              'panel/{}/get{}BatChart'.format(self.deviceType,self.deviceType.upper()),
+              'panel/{}/get{}BatChart'.format(self.device[deviceSN]['type'],self.device[deviceSN]['type'].upper()),
               formData = {
                 'plantId': self.plantId,
-                '{}Sn'.format(self.deviceType): self.deviceSN,
+                '{}Sn'.format(deviceType): deviceSN,
                 'date': date
               }
             )
 
-  def rawGetEnergyDayChart(self,date = datetime.today().strftime('%Y-%m-%d')):
+  def rawGetEnergyDayChart(self,date = datetime.today().strftime('%Y-%m-%d'), deviceSN = None):
+    deviceSN = self.__getDeviceSN(deviceSN)
+    deviceType = self.device[deviceSN]['type']
     return  self.post(
-              'panel/{}/get{}EnergyDayChart'.format(self.deviceType,self.deviceType.upper()),
+              'panel/{}/get{}EnergyDayChart'.format(deviceType,deviceType.upper()),
               formData = {
                 'plantId': self.plantId,
-                '{}Sn'.format(self.deviceType): self.deviceSN,
+                '{}Sn'.format(deviceType): deviceSN,
                 'date': date
               }
             )
 
-  def rawGetEnergyMonthChart(self,date = datetime.today().strftime('%Y-%m')):
+  def rawGetEnergyMonthChart(self,date = datetime.today().strftime('%Y-%m'), deviceSN = None):
+    deviceSN = self.__getDeviceSN(deviceSN)
+    deviceType = self.device[deviceSN]['type']
     return  self.post(
-              'panel/{}/get{}EnergyMonthChart'.format(self.deviceType,self.deviceType.upper()),
+              'panel/{}/get{}EnergyMonthChart'.format(self.device[deviceSN]['type'],self.device[deviceSN]['type'].upper()),
               formData = {
                 'plantId': self.plantId,
-                '{}Sn'.format(self.deviceType): self.deviceSN,
+                '{}Sn'.format(deviceType): deviceSN,
                 'date': date
               }
             )
 
-  def rawGetEnergyYearChart(self,year = datetime.today().strftime('%Y')):
+  def rawGetEnergyYearChart(self,year = datetime.today().strftime('%Y'), deviceSN = None):
+    deviceSN = self.__getDeviceSN(deviceSN)
+    deviceType = self.device[deviceSN]['type']
     return  self.post(
-              'panel/{}/get{}EnergyYearChart'.format(self.deviceType,self.deviceType.upper()),
+              'panel/{}/get{}EnergyYearChart'.format(self.device[deviceSN]['type'],self.device[deviceSN]['type'].upper()),
               formData = {
                 'plantId': self.plantId,
-                '{}Sn'.format(self.deviceType): self.deviceSN,
+                '{}Sn'.format(deviceType): deviceSN,
                 'year': year
               }
             )
   
-  def rawGetEnergyTotalChart(self,year = datetime.today().strftime('%Y')):
+  def rawGetEnergyTotalChart(self,year = datetime.today().strftime('%Y'), deviceSN = None):
+    deviceSN = self.__getDeviceSN(deviceSN)
+    deviceType = self.device[deviceSN]['type']
     return  self.post(
-              'panel/{}/get{}EnergyTotalChart'.format(self.deviceType,self.deviceType.upper()),
+              'panel/{}/get{}EnergyTotalChart'.format(self.device[deviceSN]['type'],self.device[deviceSN]['type'].upper()),
               formData = {
                 'plantId': self.plantId,
-                '{}Sn'.format(self.deviceType): self.deviceSN,
+                '{}Sn'.format(deviceType): deviceSN,
                 'year': year
               }
             )
 
-  def rawSetInternal(self, type, common, values):
+  def __rawSetInternal(self, type, common, values):
     '''
     Applies settings for specified system based on serial number
 
@@ -414,16 +446,18 @@ class Gowatt(object):
             cached = False
            )
 
-  def rawSet(self, type, settings):
+  def rawSet(self, type, settings, deviceSN = None):
+    deviceSN = self.__getDeviceSN(deviceSN)
+    deviceType = self.device[deviceSN]['type']
     common = {
-      'action': '{}Set'.format(self.deviceType),
-      'serialNum': self.deviceSN,
+      'action': '{}Set'.format(deviceType),
+      'serialNum': deviceSN,
       'type': type
     }
     
-    return self.rawSetInternal(type, common, settings) 
+    return self.__rawSetInternal(type, common, settings) 
   
-  def setRuleBatteryFirst(self,amount,startHour,endHour,enable):
+  def setRuleBatteryFirst(self,amount,startHour,endHour,enable,startMin = 0,endMin = 0,deviceSN = None):
     '''
     Sets the amount to charge the battery.
     Only the first schedule is used, all others are zero'd
@@ -433,28 +467,31 @@ class Gowatt(object):
       startHour -> when to start
       endHour   -> when to finish
       enable    -> whether rule is enabled or disabled
-    '''  
+    '''
+    deviceSN = self.__getDeviceSN(deviceSN)
+
     # All parameters need to be given, including zeros
     # All parameters must be strings
     schedule_settings = [
-      '100',                        # Charging power %
-      str(amount),                  # Stop charging when above SoC %
-      str(startHour), '00',         # Schedule 1 - Start time
-      str(endHour), '00',           # Schedule 1 - End time
-      str('1' if enable else '0'),  # Schedule 1 - Enabled/Disabled (1 = Enabled)
-      '00','00',                    # Schedule 2 - Start time
-      '00','00',                    # Schedule 2 - End time
-      '0',                          # Schedule 2 - Enabled/Disabled (1 = Enabled)
-      '00','00',                    # Schedule 3 - Start time
-      '00','00',                    # Schedule 3 - End time
-      '0'                           # Schedule 3 - Enabled/Disabled (1 = Enabled)
+      '100',                          # Charging power %
+      str(amount),                    # Stop charging when above SoC %
+      str(startHour), str(startMin),  # Schedule 1 - Start time
+      str(endHour), str(endMin),      # Schedule 1 - End time
+      str('1' if enable else '0'),    # Schedule 1 - Enabled/Disabled (1 = Enabled)
+      '00','00',                      # Schedule 2 - Start time
+      '00','00',                      # Schedule 2 - End time
+      '0',                            # Schedule 2 - Enabled/Disabled (1 = Enabled)
+      '00','00',                      # Schedule 3 - Start time
+      '00','00',                      # Schedule 3 - End time
+      '0'                             # Schedule 3 - Enabled/Disabled (1 = Enabled)
     ]
     
-    if self.deviceType == 'mix':
+    if self.device[deviceSN]['type'] == 'mix':
       # same as 'spa' but needs to enable AC charging (index 2 - between amount and start)
       schedule_settings.insert(2,str('1' if enable else '0'))
 
-    response = self.rawSet('{}_ac_charge_time_period'.format(self.deviceType),schedule_settings)
+    deviceType = self.device[deviceSN]['type']
+    response = self.rawSet('{}_ac_charge_time_period'.format(deviceType),schedule_settings)
     print(json.dumps(response)) # used to show working
     
     if not response or not 'msg' in response: return False
@@ -465,7 +502,7 @@ class Gowatt(object):
 
     return True
 
-  def setRuleLoadFirst(self,startHour,endHour,enable):
+  def setRuleLoadFirst(self,startHour,endHour,enable,startMin = 0,endMin = 0,deviceSN = None):
     '''
     Sets the time to use load.
     Only the first schedule is used, all others are zero'd
@@ -475,26 +512,29 @@ class Gowatt(object):
       endHour   -> when to finish
       enable    -> whether rule is enabled or disabled
     '''
+    deviceSN = self.__getDeviceSN(deviceSN)
     
     # All parameters need to be given, including zeros
     # All parameters must be strings
     schedule_settings = [
-      str(startHour), '00',         # Schedule 1 - Start time
-      str(endHour), '00',           # Schedule 1 - End time
-      str('1' if enable else '0'),  # Schedule 1 - Enabled/Disabled (1 = Enabled)
-      '00','00',                    # Schedule 2 - Start time
-      '00','00',                    # Schedule 2 - End time
-      '0',                          # Schedule 2 - Enabled/Disabled (1 = Enabled)
-      '00','00',                    # Schedule 3 - Start time
-      '00','00',                    # Schedule 3 - End time
-      '0'                           # Schedule 3 - Enabled/Disabled (1 = Enabled)
+      str(startHour), str(startMin),  # Schedule 1 - Start time
+      str(endHour), str(endMin),      # Schedule 1 - End time
+      str('1' if enable else '0'),    # Schedule 1 - Enabled/Disabled (1 = Enabled)
+      '00','00',                      # Schedule 2 - Start time
+      '00','00',                      # Schedule 2 - End time
+      '0',                            # Schedule 2 - Enabled/Disabled (1 = Enabled)
+      '00','00',                      # Schedule 3 - Start time
+      '00','00',                      # Schedule 3 - End time
+      '0'                             # Schedule 3 - Enabled/Disabled (1 = Enabled)
     ]
     
-    if self.deviceType == 'mix':
+    deviceType = self.device[deviceSN]['type']
+
+    if deviceType == 'mix':
       # same as 'spa' but needs to enable AC charging (index 2 - between amount and start)
       schedule_settings.insert(2,str('1' if enable else '0'))
 
-    response = self.rawSet('{}_load_flast'.format(self.deviceType),schedule_settings)
+    response = self.rawSet('{}_load_flast'.format(deviceType),schedule_settings,deviceSN = deviceSN)
     print(json.dumps(response)) # used to show working
     
     if not response or not 'msg' in response: return False
@@ -505,7 +545,7 @@ class Gowatt(object):
 
     return True
   
-  def setTime(self,hour,min,date = datetime.today().strftime('%Y-%m-%d')):
+  def setTime(self,hour,min,date = datetime.today().strftime('%Y-%m-%d'),deviceSN = None):
     '''
     Sets the system time.
     
@@ -519,7 +559,7 @@ class Gowatt(object):
       '{} {}:{}'.format(date,hour,min)
     ]
     
-    response = self.rawSet('pf_sys_year',settings)
+    response = self.rawSet('pf_sys_year',settings,deviceSN)
     print(json.dumps(response)) # used to show working
     
     if not response or not 'msg' in response: return False
